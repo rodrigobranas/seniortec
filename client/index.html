@@ -14,12 +14,17 @@
 				$rootScope.connected = true;
 			}
 		});
-		angular.module("chat").controller("chatCtrl", function ($scope, $window, $rootScope) {
-			$scope.messages = [
-				{date: new Date(), nickname: "Ana", message: "Oi, quer tc?"},
-				{date: new Date(), nickname: "Mãe Solteira", message: "Mãe solteira quer..."},
-				{date: new Date(), nickname: "João", message: "Eu quero!"}
-			];
+		angular.module("chat").controller("chatCtrl", function ($scope, $window, $rootScope, $http, $interval) {
+
+			var loadMessages = function () {
+				$http.get("/messages").success(function (messages) {
+					$scope.messages = messages;
+				});
+			};
+
+			$interval(function () {
+				loadMessages();
+			}, 1000);
 
 			$scope.connect = function (nickname) {
 				$window.sessionStorage.nickname = nickname;
@@ -36,7 +41,8 @@
 			$scope.send = function (message, $event) {
 				if ($event.keyCode !== 13) return;
 				if (message === undefined) return;
-				$scope.messages.push({date: new Date(), nickname: $scope.nickname, message: message});
+				var message = {date: new Date(), nickname: $scope.nickname, message: message};
+				$http.post("/messages", message);
 				delete $scope.message;
 			};
 		});
