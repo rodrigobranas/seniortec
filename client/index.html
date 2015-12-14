@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html ng-app="chat">
+<head>
+	<meta charset="UTF-8">
+	<title>Chat</title>
+	<link rel="stylesheet" type="text/css" href="bower_components/font-awesome/css/font-awesome.css">
+	<link rel="stylesheet" type="text/css" href="bower_components/bootstrap/dist/css/bootstrap.css">
+	<script src="bower_components/angular/angular.js"></script>
+	<script>
+		angular.module("chat", []);
+		angular.module("chat").run(function ($rootScope, $window) {
+			if ($window.sessionStorage.nickname) {
+				$rootScope.nickname = $window.sessionStorage.nickname;
+				$rootScope.connected = true;
+			}
+		});
+		angular.module("chat").controller("chatCtrl", function ($scope, $window, $rootScope) {
+			$scope.messages = [
+				{date: new Date(), nickname: "Ana", message: "Oi, quer tc?"},
+				{date: new Date(), nickname: "Mãe Solteira", message: "Mãe solteira quer..."},
+				{date: new Date(), nickname: "João", message: "Eu quero!"}
+			];
+
+			$scope.connect = function (nickname) {
+				$window.sessionStorage.nickname = nickname;
+				$rootScope.connected = true;
+			};
+
+			$scope.disconnect = function () {
+				delete $window.sessionStorage.nickname;
+				delete $rootScope.nickname;
+				delete $scope.nickname;		
+				$rootScope.connected = false;
+			};
+
+			$scope.send = function (message, $event) {
+				if ($event.keyCode !== 13) return;
+				if (message === undefined) return;
+				$scope.messages.push({date: new Date(), nickname: $scope.nickname, message: message});
+				delete $scope.message;
+			};
+		});
+	</script>
+	<style>
+		.main {
+			background-color: #DDD;
+			width: 500px;
+			margin-top: 20px;
+			margin-left: auto;
+			margin-right: auto;
+			padding: 20px;
+		}
+
+		.fa-heart {
+			color: red;
+		}
+
+		.form-control {
+			margin-bottom: 5px;
+		}
+	</style>
+</head>
+<body>
+	<div ng-controller="chatCtrl">
+		<div class="main">
+			<span class="fa fa-sign-out pull-right" ng-click="disconnect()"></span>
+			<h2 class="text-center">Seniortec Chat</h2>
+			<br/>
+			<div ng-hide="connected">
+				<input class="form-control" ng-model="nickname" placeholder="Nickname"/>
+				<br/>
+				<div class="text-right">
+					<button class="btn btn-success" ng-click="connect(nickname)">Connect</button>
+				</div>
+			</div>
+			<div ng-show="connected">
+				<input class="form-control" ng-model="criterio" placeholder="History"/>
+				<div class="panel panel-default panel-body">
+					<div ng-repeat="message in messages | filter:criterio"> 
+						<b>{{message.date | date:'dd/MM/yyyy HH:mm'}} {{message.nickname}}</b> {{message.message}}
+					</div>
+				</div>
+				<input class="form-control" ng-model="message" placeholder="Type your message..." ng-keyup="send(message, $event)"/>
+			</div>
+		</div>
+		<br/>
+		<div class="text-muted text-center">
+			Made with <span class="fa fa-heart" ng-class="{'fa-spin': spin}" ng-click="spin=!spin"></span> at Seniortec
+		</div>
+	</div>
+</body>
+</html>
